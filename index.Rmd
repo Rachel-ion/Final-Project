@@ -1,0 +1,62 @@
+---
+title: "Porites astreoides Survival Analysis"
+author: "Rachel Ionata"
+date: "2023-11-30"
+output: html_document
+---
+# Analyzing Porites astreoides Survival Data (Using Porites Survival by Tile excel sheet)
+
+## Adding Libraries and attaching csv
+```{r echo=FALSE, warning=FALSE} 
+
+library(pgirmess) 
+
+library(asbio)
+
+library(tidyverse)
+
+PAST_Survial<-read_csv("Porites Survival by Tile csv.csv")
+
+```
+
+# Trying one way ANOVA with %survival by tile. (Using Porites Survival by Tile excel sheet)
+## p-value <.05 need to be transformed
+```{r}
+PAST_Survial<- PAST_Survial %>% 
+  mutate(Group=factor(Group))
+
+p <- ggplot(PAST_Survial, aes(x=Group, y=Prop_Survival)) + 
+  geom_boxplot()
+p
+#Groups 1 and 2 look ok, 3 nd 4 not so much?
+
+shapiro.test (subset(PAST_Survial, Group=='1')$Prop_Survival)
+
+
+```
+
+
+# Transformation by square root
+```{r}
+PAST_Survial_sqrt <- PAST_Survial %>% 
+  mutate(Prop_Survival=sqrt(Prop_Survival))
+
+
+p2 <- ggplot(PAST_Survial_sqrt, aes(x=Group, y=Prop_Survival)) + 
+  geom_boxplot()
+p2
+
+shapiro.test (subset(PAST_Survial_sqrt, Group=='1')$Prop_Survival)
+  
+
+```
+
+
+## Non-parametric test: Kruskal-Wallis test
+```{r}
+PAST_Survial %>% 
+  kruskal.test(Prop_Survival~Group, data=.)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
